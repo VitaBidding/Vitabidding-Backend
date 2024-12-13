@@ -12,7 +12,7 @@ import { Transactional } from 'typeorm-transactional';
 import * as argon2 from 'argon2';
 
 // 내부 모듈 및 리포지토리
-import { User } from '../entities';
+import { User, ObsStudio } from '../entities';
 import { BusinessException } from '../../exception';
 import {
   AccessTokenRepository,
@@ -321,7 +321,9 @@ export class UserService {
    * @param userId 사용자 ID
    * @returns 사업자 전환 상태 (businessChk)
    */
-  async getBusinessStatus(userId: string): Promise<boolean> {
+  async getBusinessStatusWithObsStudio(
+    userId: string,
+  ): Promise<{ businessChk: boolean; obsStudio?: ObsStudio }> {
     const agreement = await this.agreementVerifyRepo.findByUserId(userId);
 
     if (!agreement) {
@@ -333,6 +335,13 @@ export class UserService {
       );
     }
 
-    return agreement.businessChk;
+    const obsStudio = await this.obsStudioRepo.findOne({
+      where: { user: { id: userId } },
+    });
+
+    return {
+      businessChk: agreement.businessChk,
+      obsStudio: obsStudio || null,
+    };
   }
 }

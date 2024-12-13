@@ -238,8 +238,8 @@ export class AuthController {
    * 사용자 정보 조회
    * 주소를 포함한 사용자 정보 반환
    */
-  @UseGuards(JwtAuthGuard)
   @Get('profile')
+  @UseGuards(JwtAuthGuard)
   async getProfile(@Token() accessToken: string): Promise<any> {
     if (!accessToken) {
       throw new HttpException('Unauthorized', HttpStatus.UNAUTHORIZED);
@@ -264,8 +264,8 @@ export class AuthController {
   }
 
   // 회원 정보 수정
-  @UseGuards(JwtAuthGuard)
   @Put('profile')
+  @UseGuards(JwtAuthGuard)
   async updateProfile(
     @Token() accessToken: string, // 커스텀 데코레이터 사용
     @Body() updateUserDto: UpdateUserDto,
@@ -282,8 +282,8 @@ export class AuthController {
   }
 
   // 회원탈퇴
-  @UseGuards(JwtAuthGuard)
   @Delete('delete-account')
+  @UseGuards(JwtAuthGuard)
   async deleteAccount(
     @Token() accessToken: string,
   ): Promise<{ message: string }> {
@@ -312,8 +312,8 @@ export class AuthController {
    * @param accessToken 액세스 토큰에서 추출된 사용자 ID
    * @param dto 사업자 전환 DTO
    */
-  @UseGuards(JwtAuthGuard)
   @Post('convert-to-business')
+  @UseGuards(JwtAuthGuard)
   async convertToBusiness(
     @Token() accessToken: string,
     @Body() dto: ConvertToBusinessDto,
@@ -341,9 +341,11 @@ export class AuthController {
    * 사업자 계정 전환 상태 조회
    */
   @Get('business-status')
-  async getBusinessStatus(
-    @Token() accessToken: string,
-  ): Promise<{ businessChk: boolean }> {
+  @UseGuards(JwtAuthGuard)
+  async getBusinessStatus(@Token() accessToken: string): Promise<{
+    businessChk: boolean;
+    obsStudio?: { obsUrl: string; auctionUrl: string; videoLiveUrl: string };
+  }> {
     if (!accessToken) {
       throw new HttpException(
         '액세스 토큰이 필요합니다.',
@@ -359,8 +361,19 @@ export class AuthController {
       );
     }
 
-    const status = await this.userService.getBusinessStatus(userId);
-    return { businessChk: status };
+    const { businessChk, obsStudio } =
+      await this.userService.getBusinessStatusWithObsStudio(userId);
+
+    return {
+      businessChk,
+      obsStudio: obsStudio
+        ? {
+            obsUrl: obsStudio.obsUrl,
+            auctionUrl: obsStudio.auctionUrl,
+            videoLiveUrl: obsStudio.videoLiveUrl,
+          }
+        : null,
+    };
   }
 
   /**
