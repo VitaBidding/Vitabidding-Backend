@@ -18,6 +18,7 @@ import { AuthModule } from './auth/auth.module';
 import { RedisModule } from './redis/redis.module';
 import { BusinessModule } from './business/business.module';
 import { OCIModule } from './common/modules/oci.module';
+import { PointModule } from './point/point.module';
 
 // 글로벌 인터셉터
 import { LoggingInterceptor } from './interceptors';
@@ -76,6 +77,7 @@ import { DataSource } from 'typeorm';
     // 비즈니스 로직 모듈
     BusinessModule,
     OCIModule,
+    PointModule,
   ],
   controllers: [AppController], // 애플리케이션 컨트롤러
   providers: [

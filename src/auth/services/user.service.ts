@@ -21,6 +21,7 @@ import {
   AgreementVerifyRepository,
   ObsStudioRepository,
 } from '../repositories';
+import { PointRepository } from '../../point/repositories';
 
 import { generateRandomString } from '../../util';
 
@@ -38,6 +39,7 @@ export class UserService {
 
   constructor(
     private readonly userRepo: UserRepository,
+    private readonly pointRepo: PointRepository,
     private readonly accessTokenRepo: AccessTokenRepository,
     private readonly addressRepo: AddressRepository,
     private readonly agreementVerifyRepo: AgreementVerifyRepository,
@@ -51,8 +53,8 @@ export class UserService {
   async createUser(dto: CreateUserDto1): Promise<User> {
     const normalizedEmail = dto.email.trim().toLowerCase();
 
-    const user = await this.userRepo.findOneByEmail(normalizedEmail);
-    if (user) {
+    const existingUser = await this.userRepo.findOneByEmail(normalizedEmail);
+    if (existingUser) {
       throw new BusinessException(
         'user',
         '이미 존재하는 이메일입니다.',
@@ -63,10 +65,26 @@ export class UserService {
 
     try {
       const hashedPassword = await argon2.hash(dto.password);
-      return this.userRepo.createUser(
-        { ...dto, email: normalizedEmail },
-        hashedPassword,
-      );
+
+      // 사용자 생성
+      const newUser = this.userRepo.create({
+        ...dto,
+        email: normalizedEmail,
+        password: hashedPassword,
+      });
+      const savedUser = await this.userRepo.save(newUser);
+
+      // 사용자와 연결된 Point 엔티티 생성 및 초기화
+      const point = this.pointRepo.create({
+        user: savedUser, // Point와 User 연결
+        totalPoints: 0,
+        totalChargedPoints: 0,
+        totalUsedPoints: 0,
+        totalRefundedPoints: 0,
+      });
+      await this.pointRepo.save(point);
+
+      return savedUser;
     } catch (error) {
       this.logger.error('사용자 생성 중 오류 발생:', error);
       throw new InternalServerErrorException('사용자 생성에 실패했습니다.');

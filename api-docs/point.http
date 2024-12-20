@@ -1,0 +1,68 @@
+@domain = https://localhost:4000
+@accessToken = {{loginToken.response.body.$.accessToken}}
+@refreshToken = {{loginToken.response.body.$.refreshToken}}
+
+###
+# 로그인 <User>
+# @name loginToken
+POST {{domain}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "user1@gmail.com",
+  "password": "123qweQWE!"
+}
+
+###
+# 사용자 포인트 조회 <User>
+GET {{domain}}/point/balance
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+###
+# 사용자 기본 정보 요청 <User>
+GET {{domain}}/point/user-info
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+###
+# 포인트 충전 요청 <User>
+POST {{domain}}/point/request
+Authorization: Bearer {{accessToken}}
+Content-Type: application/json
+
+{
+  "requestedPoints": 1000,
+  "depositorName": "김철수",
+  "phoneNumber": "01012345678"
+}
+
+###
+# 모든 충전 요청 조회 <Admin>
+GET {{domain}}/point/requests
+Content-Type: application/json
+
+###
+# 특정 상태의 충전 요청 조회 <Admin>
+# pending(대기), approved(승인), rejected(거부)
+GET {{domain}}/point/requests?status=pending
+Content-Type: application/json
+
+###
+# 특정 사용자의 충전 요청 조회 <Admin>
+GET {{domain}}/point/requests?userId=7c13c5d9-892b-4fe2-88f9-7bf8e82dd0e4
+Content-Type: application/json
+
+
+###
+# 충전 요청 승인 | 거절 <Admin>
+# pending(대기), approved(승인), rejected(거부)
+POST {{domain}}/point/approve/98b1bb30-7fc5-417e-aa07-3dc146c14fbd
+Content-Type: application/json
+
+{
+  "status": "rejected",
+  "adminComment": "입금 확인되지 않음"
+}
+
+

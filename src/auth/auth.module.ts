@@ -1,6 +1,6 @@
 // src/auth/auth.module.ts
 // NestJS 모듈 및 데코레이터
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -41,6 +41,8 @@ import { JwtAuthGuard } from '../common/guards';
 // 컨트롤러
 import { AuthController } from './controllers';
 
+import { PointModule } from '../point/point.module';
+
 @Module({
   imports: [
     HttpModule,
@@ -68,6 +70,7 @@ import { AuthController } from './controllers';
       ChangeBusiness,
       ObsStudio,
     ]),
+    forwardRef(() => PointModule),
   ],
   controllers: [AuthController],
   providers: [

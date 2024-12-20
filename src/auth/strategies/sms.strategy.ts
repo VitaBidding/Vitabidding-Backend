@@ -39,6 +39,10 @@ export class SmsStrategy {
   }
 
   async sendVerificationCode(phoneNumber: string, code: string): Promise<void> {
+    await this.sendCustomMessage(phoneNumber, `비타비딩 인증번호 ${code}.`);
+  }
+
+  async sendCustomMessage(phoneNumber: string, content: string): Promise<void> {
     const timestamp = Date.now().toString();
     const signature = this.generateSignature(timestamp);
 
@@ -47,7 +51,7 @@ export class SmsStrategy {
       {
         type: 'SMS',
         from: this.caller,
-        content: `Your verification code is ${code}.`,
+        content,
         messages: [{ to: phoneNumber }],
       },
       {
@@ -61,7 +65,7 @@ export class SmsStrategy {
     );
 
     if (response.status !== 202) {
-      throw new Error('Failed to send verification code');
+      throw new Error('Failed to send SMS message');
     }
   }
 }
