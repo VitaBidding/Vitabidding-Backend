@@ -51,4 +51,10 @@ export const validationSchema = Joi.object({
   OCI_BUCKET_NAME: Joi.string().required(),
   OCI_NAMESPACE: Joi.string().required(),
   OCI_CONFIG_FILE: Joi.string().required(),
+
+  // 결제
+  DISCORD_WEBHOOK: Joi.string().required(),
+  DISCORD_WEBHOOK_THUMBNAIL: Joi.string().required(),
+  PAYMENT_NUMBER: Joi.string().required(),
+  PAYMENT_NAME: Joi.string().required(),
 });
